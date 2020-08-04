@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2020 Jan Graßegger
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'signing'
+    id 'io.codearte.nexus-staging' version '0.21.2'
+}
+
+group 'de.gesundkrank.fzf4j'
+version '0.1.0'
+description 'Fzf Java implementation to use in Java CLI applications.'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation group: 'com.googlecode.lanterna', name: 'lanterna', version: '3.0.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.6.2'
+    testImplementation group: 'org.hamcrest', name: 'hamcrest-library', version: '2.2'
+}
+
+publishing {
+    publications {
+        Fzf4j(MavenPublication) {
+            from components.java
+
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/gesundkrank/fzf4j'
+
+                developers {
+                    developer {
+                        id = 'gesundkrank'
+                        name = 'Jan Graßegger'
+                        email = 'gesundkrank@mailbox.org'
+                    }
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/gesundkrank/fzf4j.git'
+                    developerConnection = 'scm:git:git@github.com:gesundkrank/fzf4j.git'
+                    url = 'https://github.com/gesundkrank/fzf4j'
+                }
+            }
+        }
+
+    }
+    repositories {
+        maven {
+            name = 'SonatypeOSS'
+            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = project.findProperty('sonatype.user') ?: System.getenv("SONATYPE_USER")
+                password = project.findProperty('sonatype.password') ?:
+                           System.getenv("SONATYPE_PASSWORD")
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = findProperty("sign.key") ?: System.getenv("SIGN_KEY")
+    def signingPassword = findProperty("sign.password") ?: System.getenv("SIGN_PASSWORD")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.Fzf4j
+}
+
+nexusStaging {
+    packageGroup = 'de.gesundkrank'
+    username = project.findProperty('sonatype.user') ?: System.getenv("SONATYPE_USER")
+    password = project.findProperty('sonatype.password') ?: System.getenv("SONATYPE_PASSWORD")
+}
+
+javadoc {
+    options.addBooleanOption('html5', true)
+}

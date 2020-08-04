@@ -1,0 +1,56 @@
+= FZF4J
+
+Fzf Java implementation to use in Java CLI applications.
+Based on https://github.com/junegunn/fzf.
+
+== Usage
+
+FZF4J is intended to use in Java command-line applications.
+In case you want use it directly from the console just the original FZF.
+
+=== Add the dependency to your build file
+
+.Maven
+[source,xml]
+----
+<dependency>
+    <groupId>de.gesundkrank.fzf4j</groupId>
+    <artifactId>fzf4j</artifactId>
+    <version>0.1.0</version>
+</dependency>
+----
+
+.Gradle
+[source,groovy]
+----
+implementation group: 'de.gesundkrank.fzf4j', name: 'fzf4j', version: '0.1.0'
+----
+
+=== Example
+
+.Create FZF instance
+[source,java]
+----
+Fzf fzf = Fzf.builder()
+            .reverse()
+            .orderBy(OrderBy.SCORE)
+            .build();
+----
+
+.Select single item
+[source,java]
+----
+String selectedItem = fzf.select(list);
+----
+
+.Select multiple items
+[source,java]
+----
+List<String> selectedItems = fzf.multiSelect(list);
+----
+
+.Limit the number of selectable items
+[source,java]
+----
+List<String> selectedItems = fzf.multiSelect(list, 5);
+----
