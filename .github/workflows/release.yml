@@ -28,4 +28,30 @@ jobs:
           SIGN_KEY: ${{ secrets.GPG_KEY }}
           SIGN_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
         run: ./gradlew publish closeAndReleaseRepository
+  github-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Get project version
+        run: VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+      - name: Get commits since last release
+        run: COMMITS=$(echo "- $(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s --no-merges)")
+      - name: Create GitHub Release
+        if: endsWith(env.VERSION, '-SNAPSHOT') == false
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release v${{ env.VERSION }}
+          body: |
+            Changes:
+            ${{ env.COMMITS }}
 
