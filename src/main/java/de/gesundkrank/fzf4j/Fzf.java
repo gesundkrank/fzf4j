@@ -174,12 +174,13 @@ public class Fzf {
                     break;
                 case Tab:
                     if (multiSelect) {
-                        final var index = state.getCursorItem();
+                        final var localIndex = state.getCursorItem();
+                        final var globalIndex = state.getResults().get(localIndex).getItemIndex();
                         final var selectedItems = state.getSelectedItems();
-                        if (selectedItems.contains(index)) {
-                            selectedItems.remove(index);
+                        if (selectedItems.contains(globalIndex)) {
+                            selectedItems.remove(globalIndex);
                         } else if (maxItems == -1 || selectedItems.size() < maxItems) {
-                            selectedItems.add(index);
+                            selectedItems.add(globalIndex);
                         }
                     }
                     break;
