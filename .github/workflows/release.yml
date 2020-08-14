@@ -33,6 +33,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
       - name: Set up JDK 11
         uses: actions/setup-java@v1
         with:
@@ -40,9 +41,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Get project version
-        run: VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+        run: |
+          VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+          echo "::set-env name=VERSION::$VERSION"
       - name: Get commits since last release
-        run: COMMITS=$(echo "- $(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s --no-merges)")
+        run: |
+          COMMITS=$(echo "- $(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s --no-merges)")
+          echo "::set-env name=COMMITS::$COMMITS"
       - name: Create GitHub Release
         if: endsWith(env.VERSION, '-SNAPSHOT') == false
         uses: actions/create-release@v1
@@ -54,4 +59,3 @@ jobs:
           body: |
             Changes:
             ${{ env.COMMITS }}
-
