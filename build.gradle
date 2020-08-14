@@ -28,7 +28,7 @@ plugins {
 }
 
 group 'de.gesundkrank.fzf4j'
-version '0.1.0'
+version '0.1.1-SNAPSHOT'
 description 'Fzf Java implementation to use in Java CLI applications.'
 
 sourceCompatibility = 11
