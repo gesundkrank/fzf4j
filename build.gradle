@@ -93,7 +93,7 @@ publishing {
             name = 'SonatypeOSS'
             def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
             credentials {
                 username = project.findProperty('sonatype.user') ?: System.getenv("SONATYPE_USER")
                 password = project.findProperty('sonatype.password') ?:
