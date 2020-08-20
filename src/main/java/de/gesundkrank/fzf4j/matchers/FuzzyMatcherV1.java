@@ -37,15 +37,15 @@ import de.gesundkrank.fzf4j.utils.ResultComparator;
  */
 public class FuzzyMatcherV1 {
 
-    final static int SCORE_MATCH = 16;
-    final static int SCORE_GAP_START = -3;
-    final static int SCORE_GAP_EXTENSION = -1;
+    static final int SCORE_MATCH = 16;
+    static final int SCORE_GAP_START = -3;
+    static final int SCORE_GAP_EXTENSION = -1;
 
-    final static int BONUS_BOUNDARY = SCORE_MATCH / 2;
-    final static int BONUS_NON_WORD = SCORE_MATCH / 2;
-    final static int BONUS_CAMEL_123 = BONUS_BOUNDARY + SCORE_GAP_EXTENSION;
-    final static int BONUS_CONSECUTIVE = -(SCORE_GAP_START + SCORE_GAP_EXTENSION);
-    final static int BONUS_FIRST_CHAR_MULTIPLIER = 2;
+    static final int BONUS_BOUNDARY = SCORE_MATCH / 2;
+    static final int BONUS_NON_WORD = SCORE_MATCH / 2;
+    static final int BONUS_CAMEL_123 = BONUS_BOUNDARY + SCORE_GAP_EXTENSION;
+    static final int BONUS_CONSECUTIVE = -(SCORE_GAP_START + SCORE_GAP_EXTENSION);
+    static final int BONUS_FIRST_CHAR_MULTIPLIER = 2;
 
     private final List<String> items;
     private final OrderBy orderBy;
@@ -175,8 +175,8 @@ public class FuzzyMatcherV1 {
     private int bonusFor(CharClass prevClass, CharClass charClass) {
         if (prevClass == CharClass.NON_WORD && charClass != CharClass.NON_WORD) {
             return BONUS_BOUNDARY;
-        } else if (prevClass == CharClass.LOWER && charClass == CharClass.UPPER ||
-                   prevClass != CharClass.NUMBER && charClass == CharClass.NUMBER) {
+        } else if (prevClass == CharClass.LOWER && charClass == CharClass.UPPER
+                   || prevClass != CharClass.NUMBER && charClass == CharClass.NUMBER) {
             // camelCase letter123
             return BONUS_CAMEL_123;
         } else if (charClass == CharClass.NON_WORD) {

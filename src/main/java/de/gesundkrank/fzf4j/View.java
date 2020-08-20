@@ -36,6 +36,7 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+
 import de.gesundkrank.fzf4j.models.TerminalState;
 
 /**
@@ -85,11 +86,6 @@ public class View implements AutoCloseable {
         return screen.readInput();
     }
 
-    public void render(final TerminalState state) throws IOException {
-        this.state = state;
-        render();
-    }
-
     private void renderIfResized() {
         if (state != null && screen.doResizeIfNecessary() != null) {
             try {
@@ -98,6 +94,11 @@ public class View implements AutoCloseable {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void render(final TerminalState state) throws IOException {
+        this.state = state;
+        render();
     }
 
     private synchronized void render() throws IOException {
@@ -119,9 +120,9 @@ public class View implements AutoCloseable {
 
         drawStart = Math.max(Math.min(drawStart, itemsSize - itemCount), 0);
 
-        final var visibleItems = itemsSize > itemCount ?
-                                 state.getResults().subList(drawStart, drawStart + itemCount)
-                                                       : state.getResults();
+        final var visibleItems = itemsSize > itemCount
+                                 ? state.getResults().subList(drawStart, drawStart + itemCount)
+                                 : state.getResults();
 
         final var localSelectedItem = selectedPosition - drawStart;
 
@@ -147,7 +148,9 @@ public class View implements AutoCloseable {
 
                 if (state.getSelectedItems().contains(item.getItemIndex())) {
                     screen.setCharacter(
-                            1, row, new TextCharacter('>', SELECTED_ITEM_COLOR, HIGHLIGHT_BG_COLOR));
+                            1, row,
+                            new TextCharacter('>', SELECTED_ITEM_COLOR, HIGHLIGHT_BG_COLOR)
+                    );
                 }
 
                 for (var i = 0; i < item.getText().length(); i++) {
