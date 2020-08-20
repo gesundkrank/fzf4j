@@ -1,6 +1,7 @@
 = FZF4J
 
-image::https://img.shields.io/maven-central/v/de.gesundkrank.fzf4j/fzf4j.svg[link=https://search.maven.org/search?q=g:de.gesundkrank.fzf4j%20AND%20a:fzf4j]
+image:https://github.com/gesundkrank/fzf4j/workflows/Release/badge.svg[Release]
+image:https://img.shields.io/maven-central/v/de.gesundkrank.fzf4j/fzf4j.svg[link=https://search.maven.org/search?q=g:de.gesundkrank.fzf4j%20AND%20a:fzf4j]
 
 Fzf Java implementation to use in Java CLI applications.
 Based on https://github.com/junegunn/fzf.
