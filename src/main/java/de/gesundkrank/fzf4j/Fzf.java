@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.googlecode.lanterna.input.KeyType;
+
 import de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1;
 import de.gesundkrank.fzf4j.models.OrderBy;
 import de.gesundkrank.fzf4j.models.TerminalState;
@@ -49,25 +49,6 @@ public class Fzf {
         this.reverse = reverse;
     }
 
-    /**
-     * Starts fzf for a list of strings. Returns a single selected string or throws an exception.
-     *
-     * @param items list of strings to select from
-     * @return selected item
-     * @throws IOException          if terminal interaction has an error
-     * @throws EmptyResultException if no item was selected
-     * @throws AbortByUserException if the user aborts by hitting the escape button
-     */
-    public String select(final List<String> items)
-            throws IOException, EmptyResultException, AbortByUserException {
-        final var state = select(items, false, -1);
-
-        if (state.getCursorItem() == -1) {
-            throw new EmptyResultException();
-        }
-        return state.getCursorResult().getText();
-    }
-
     public List<String> multiSelect(final List<String> items)
             throws AbortByUserException, IOException, EmptyResultException {
         return multiSelect(items, -1);
@@ -86,6 +67,25 @@ public class Fzf {
         }
 
         return selectedItems.stream().map(items::get).collect(Collectors.toList());
+    }
+
+    /**
+     * Starts fzf for a list of strings. Returns a single selected string or throws an exception.
+     *
+     * @param items list of strings to select from
+     * @return selected item
+     * @throws IOException          if terminal interaction has an error
+     * @throws EmptyResultException if no item was selected
+     * @throws AbortByUserException if the user aborts by hitting the escape button
+     */
+    public String select(final List<String> items)
+            throws IOException, EmptyResultException, AbortByUserException {
+        final var state = select(items, false, -1);
+
+        if (state.getCursorItem() == -1) {
+            throw new EmptyResultException();
+        }
+        return state.getCursorResult().getText();
     }
 
     private TerminalState select(
@@ -198,6 +198,8 @@ public class Fzf {
                     state.setQuery(queryBuilder.toString());
                     state.setResults(fuzzyMatcherV1.match(queryBuilder.toString()));
                     state.setCursorPosition(state.getCursorPosition() + 1);
+                    break;
+                default:
             }
 
             view.render(state);

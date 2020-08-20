@@ -22,11 +22,6 @@
 
 package de.gesundkrank.fzf4j.matchers;
 
-import java.util.Collections;
-
-import de.gesundkrank.fzf4j.models.OrderBy;
-import org.junit.jupiter.api.Test;
-
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_BOUNDARY;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_CAMEL_123;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_FIRST_CHAR_MULTIPLIER;
@@ -37,6 +32,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+
+import java.util.Collections;
+
+import org.junit.jupiter.api.Test;
+
+import de.gesundkrank.fzf4j.models.OrderBy;
 
 class FuzzyMatcherV1Test {
 
@@ -69,8 +70,8 @@ class FuzzyMatcherV1Test {
                    SCORE_MATCH * 3 + BONUS_CAMEL_123 + SCORE_GAP_START + SCORE_GAP_EXTENSION * 3
         );
         checkMatch("Foo/Bar/Baz", "FBB", 0, 9,
-                   SCORE_MATCH * 3 + BONUS_BOUNDARY * (BONUS_FIRST_CHAR_MULTIPLIER + 2) +
-                   SCORE_GAP_START * 2 + SCORE_GAP_EXTENSION * 4
+                   SCORE_MATCH * 3 + BONUS_BOUNDARY * (BONUS_FIRST_CHAR_MULTIPLIER + 2)
+                   + SCORE_GAP_START * 2 + SCORE_GAP_EXTENSION * 4
         );
         checkMatch("FooBarBaz", "FBB", 0, 7,
                    SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
