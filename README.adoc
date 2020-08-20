@@ -1,5 +1,7 @@
 = FZF4J
 
+image::https://img.shields.io/maven-central/v/de.gesundkrank.fzf4j/fzf4j.svg[link=https://search.maven.org/search?q=g:de.gesundkrank.fzf4j%20AND%20a:fzf4j]
+
 Fzf Java implementation to use in Java CLI applications.
 Based on https://github.com/junegunn/fzf.
 
@@ -16,14 +18,14 @@ In case you want use it directly from the console just the original FZF.
 <dependency>
     <groupId>de.gesundkrank.fzf4j</groupId>
     <artifactId>fzf4j</artifactId>
-    <version>0.1.0</version>
+    <version>VERSION</version>
 </dependency>
 ----
 
 .Gradle
 [source,groovy]
 ----
-implementation group: 'de.gesundkrank.fzf4j', name: 'fzf4j', version: '0.1.0'
+implementation group: 'de.gesundkrank.fzf4j', name: 'fzf4j', version: 'VERSION'
 ----
 
 === Example
