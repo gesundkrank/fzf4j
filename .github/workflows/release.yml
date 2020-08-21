@@ -46,7 +46,7 @@ jobs:
           echo "::set-env name=VERSION::$VERSION"
       - name: Get commits since last release
         run: |
-          COMMITS=$(echo "- $(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s --no-merges)")
+          COMMITS=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:'- %s' --no-merges)
           echo "::set-env name=COMMITS::$COMMITS"
       - name: Create GitHub Release
         if: endsWith(env.VERSION, '-SNAPSHOT') == false
