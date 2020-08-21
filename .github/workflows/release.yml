@@ -27,7 +27,17 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SIGN_KEY: ${{ secrets.GPG_KEY }}
           SIGN_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
-        run: ./gradlew publish closeAndReleaseRepository
+        run: ./gradlew publish
+      - name: Close and Release Repository
+        env:
+          GITHUB_USER: $GITHUB_ACTOR
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGN_KEY: ${{ secrets.GPG_KEY }}
+          SIGN_PASSWORD: ${{ secrets.GPG_KEY_PASSWORD }}
+        if: endsWith(env.VERSION, '-SNAPSHOT') == false
+        run: ./gradlew closeAndReleaseRepository
   github-release:
     runs-on: ubuntu-latest
 
