@@ -42,10 +42,25 @@ import de.gesundkrank.fzf4j.models.OrderBy;
 class FuzzyMatcherV1Test {
 
     private void checkMatch(
-            final String input, final String pattern, final int expectedStartIndex,
-            final int expectedEndIndex, final int expectedScore
+            final String input,
+            final String pattern,
+            final int expectedStartIndex,
+            final int expectedEndIndex,
+            final int expectedScore
     ) {
-        final var matcher = new FuzzyMatcherV1(Collections.singletonList(input), OrderBy.SCORE);
+        checkMatch(input, pattern, false, expectedStartIndex, expectedEndIndex, expectedScore);
+    }
+
+    private void checkMatch(
+            final String input,
+            final String pattern,
+            final boolean normalize,
+            final int expectedStartIndex,
+            final int expectedEndIndex,
+            final int expectedScore
+    ) {
+        final var matcher = new FuzzyMatcherV1(
+                Collections.singletonList(input), OrderBy.SCORE, normalize);
         final var results = matcher.match(pattern);
         assertThat(results, is(not(empty())));
 
@@ -56,7 +71,8 @@ class FuzzyMatcherV1Test {
     }
 
     private void checkNoMatch(final String input, final String pattern) {
-        final var matcher = new FuzzyMatcherV1(Collections.singletonList(input), OrderBy.SCORE);
+        final var matcher = new FuzzyMatcherV1(
+                Collections.singletonList(input), OrderBy.SCORE, false);
         final var results = matcher.match(pattern);
         assertThat(results, is(empty()));
     }
@@ -86,6 +102,10 @@ class FuzzyMatcherV1Test {
         checkMatch("foo-bar", "o-ba", 2, 6,
                    SCORE_MATCH * 4 + BONUS_BOUNDARY * 3
         );
+
+        // Normalize
+        checkMatch("Só Danço Samba", "So", true, 0, 2, 56);
+        checkMatch("Danço", "Danco", true,0, 5, 128);
 
         // Non-match
         checkNoMatch("fooBarbaz", "oBZ");

@@ -37,6 +37,7 @@ implementation group: 'de.gesundkrank.fzf4j', name: 'fzf4j', version: 'VERSION'
 Fzf fzf = Fzf.builder()
             .reverse()
             .orderBy(OrderBy.SCORE)
+            .normalize()
             .build();
 ----
 

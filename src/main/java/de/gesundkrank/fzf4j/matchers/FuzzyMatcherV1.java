@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import de.gesundkrank.fzf4j.Normalizer;
 import de.gesundkrank.fzf4j.models.OrderBy;
 import de.gesundkrank.fzf4j.models.Result;
 import de.gesundkrank.fzf4j.utils.ResultComparator;
@@ -49,33 +50,48 @@ public class FuzzyMatcherV1 {
 
     private final List<String> items;
     private final OrderBy orderBy;
+    private final boolean normalize;
+    private final List<String> normalizedItems;
 
-    public FuzzyMatcherV1(final List<String> items, final OrderBy orderBy) {
+    public FuzzyMatcherV1(
+            final List<String> items,
+            final OrderBy orderBy,
+            final boolean normalize
+    ) {
         this.items = items;
         this.orderBy = orderBy;
+        this.normalize = normalize;
+        this.normalizedItems = normalize ? Normalizer.normalize(items) : items;
     }
 
-    public List<Result> match(String pattern) {
+    public List<Result> match(final String pattern) {
         if (pattern.isEmpty()) {
             return IntStream.range(0, items.size()).parallel()
                     .mapToObj(i -> new Result(items.get(i), i))
                     .collect(Collectors.toList());
         }
 
+        final String normalizedPattern = normalize ? Normalizer.normalize(pattern) : pattern;
+
         return IntStream.range(0, items.size()).parallel()
-                .mapToObj(i -> match(items.get(i), pattern, i))
+                .mapToObj(i -> match(items.get(i), normalizedItems.get(i), normalizedPattern, i))
                 .filter(Result::isMatch)
                 .sorted(new ResultComparator(orderBy))
                 .collect(Collectors.toList());
     }
 
-    private Result match(String text, String pattern, int itemIndex) {
+    private Result match(
+            final String text,
+            final String normalizedText,
+            final String pattern,
+            final int itemIndex
+    ) {
         var queryIndex = 0;
         var startIndex = -1;
         var endIndex = -1;
 
-        for (int textIndex = 0; textIndex < text.length(); textIndex++) {
-            final char textChar = text.charAt(textIndex);
+        for (int textIndex = 0; textIndex < normalizedText.length(); textIndex++) {
+            final char textChar = normalizedText.charAt(textIndex);
             final char queryChar = pattern.charAt(queryIndex);
 
             if (textChar == queryChar) {
@@ -95,7 +111,7 @@ public class FuzzyMatcherV1 {
 
         if (startIndex != -1 && endIndex != -1) {
             for (int textIndex = endIndex - 1; textIndex > startIndex; textIndex--) {
-                final var textChar = text.charAt(textIndex);
+                final var textChar = normalizedText.charAt(textIndex);
                 final var queryChar = pattern.charAt(queryIndex);
 
                 if (textChar == queryChar) {
@@ -108,14 +124,19 @@ public class FuzzyMatcherV1 {
                 }
             }
 
-            return calculateScore(text, pattern, startIndex, endIndex, itemIndex);
+            return calculateScore(text, normalizedText, pattern, startIndex, endIndex, itemIndex);
         }
 
         return new Result(text, itemIndex);
     }
 
     private Result calculateScore(
-            final String text, String pattern, int startIndex, int endIndex, int itemIndex
+            final String text,
+            final String normalizedText,
+            final String pattern,
+            final int startIndex,
+            final int endIndex,
+            final int itemIndex
     ) {
         var patternIndex = 0;
         var score = 0;
@@ -124,11 +145,11 @@ public class FuzzyMatcherV1 {
         var inGap = false;
         var pos = new int[pattern.length()];
 
-        var prevClass = startIndex > 0 ? CharClass.forChar(text.charAt(startIndex - 1))
+        var prevClass = startIndex > 0 ? CharClass.forChar(normalizedText.charAt(startIndex - 1))
                                        : CharClass.NON_WORD;
 
         for (var i = startIndex; i < endIndex; i++) {
-            final var c = text.charAt(i);
+            final var c = normalizedText.charAt(i);
             final var charClass = CharClass.forChar(c);
 
             if (c == pattern.charAt(patternIndex)) {
@@ -184,7 +205,6 @@ public class FuzzyMatcherV1 {
         }
         return 0;
     }
-
 
     private enum CharClass {
         LOWER, UPPER, LETTER, NUMBER, NON_WORD;

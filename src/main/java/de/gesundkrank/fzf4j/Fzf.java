@@ -37,16 +37,18 @@ public class Fzf {
 
     private final OrderBy orderBy;
     private final boolean reverse;
+    private final boolean normalize;
 
     private FuzzyMatcherV1 fuzzyMatcherV1;
 
     public Fzf() {
-        this(OrderBy.SCORE, false);
+        this(OrderBy.SCORE, false, false);
     }
 
-    public Fzf(final OrderBy orderBy, final boolean reverse) {
+    public Fzf(final OrderBy orderBy, final boolean reverse, final boolean normalize) {
         this.orderBy = orderBy;
         this.reverse = reverse;
+        this.normalize = normalize;
     }
 
     public List<String> multiSelect(final List<String> items)
@@ -97,7 +99,7 @@ public class Fzf {
             throw new EmptyResultException();
         }
 
-        this.fuzzyMatcherV1 = new FuzzyMatcherV1(items, orderBy);
+        this.fuzzyMatcherV1 = new FuzzyMatcherV1(items, orderBy, normalize);
 
         try (final var view = new View(items, reverse)) {
             final var state = new TerminalState(fuzzyMatcherV1.match(""));
@@ -238,9 +240,10 @@ public class Fzf {
 
         private boolean reverse = false;
         private OrderBy orderBy = OrderBy.SCORE;
+        private boolean normalize = false;
 
         public Fzf build() {
-            return new Fzf(orderBy, reverse);
+            return new Fzf(orderBy, reverse, normalize);
         }
 
         public Builder reverse() {
@@ -250,6 +253,11 @@ public class Fzf {
 
         public Builder orderBy(OrderBy orderBy) {
             this.orderBy = orderBy;
+            return this;
+        }
+
+        public Builder normalize() {
+            this.normalize = true;
             return this;
         }
     }
