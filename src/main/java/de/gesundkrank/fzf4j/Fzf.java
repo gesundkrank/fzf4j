@@ -51,11 +51,33 @@ public class Fzf {
         this.normalize = normalize;
     }
 
+    /**
+     * Runs fzf for a list of strings. Multiple items can be selected using <i>Tab</i>.
+     * Returns a selected strings or throws an exception.
+     *
+     * @param items List of strings to select results from.
+     * @return Selected items
+     * @throws IOException          if terminal interaction has an error
+     * @throws EmptyResultException if no item was selected
+     * @throws AbortByUserException if the user aborts by hitting the escape button
+     */
     public List<String> multiSelect(final List<String> items)
             throws AbortByUserException, IOException, EmptyResultException {
         return multiSelect(items, -1);
     }
 
+    /**
+     * Runs fzf for a list of strings. Multiple items can be selected using <i>Tab</i>.
+     * Returns a selected strings or throws an exception.
+     *
+     * @param items    List of strings to select results from.
+     * @param maxItems Number of items that can be selected.
+     *                 Set to <i>-1</i> to not limited number of selected items.
+     * @return Selected items
+     * @throws IOException          if terminal interaction has an error
+     * @throws EmptyResultException if no item was selected
+     * @throws AbortByUserException if the user aborts by hitting the escape button
+     */
     public List<String> multiSelect(final List<String> items, final int maxItems)
             throws EmptyResultException, IOException, AbortByUserException {
         final var state = select(items, true, maxItems);
@@ -72,10 +94,10 @@ public class Fzf {
     }
 
     /**
-     * Starts fzf for a list of strings. Returns a single selected string or throws an exception.
+     * Runs fzf for a list of strings. Returns a single selected string or throws an exception.
      *
-     * @param items list of strings to select from
-     * @return selected item
+     * @param items List of strings to select result from.
+     * @return Selected item
      * @throws IOException          if terminal interaction has an error
      * @throws EmptyResultException if no item was selected
      * @throws AbortByUserException if the user aborts by hitting the escape button
@@ -246,16 +268,32 @@ public class Fzf {
             return new Fzf(orderBy, reverse, normalize);
         }
 
+        /**
+         * Reverse showed order in terminal. Top item is shown at the bottom.
+         *
+         * @return Updated {@link Builder}
+         */
         public Builder reverse() {
             this.reverse = true;
             return this;
         }
 
+        /**
+         * Define result ordering
+         *
+         * @param orderBy Order method used for result ordering (default = {@link OrderBy#SCORE}).
+         * @return Updated {@link Builder}
+         */
         public Builder orderBy(OrderBy orderBy) {
             this.orderBy = orderBy;
             return this;
         }
 
+        /**
+         * Normalize strings using {@link Normalizer#normalize(String)}.
+         *
+         * @return Updated {@link Builder}
+         */
         public Builder normalize() {
             this.normalize = true;
             return this;
