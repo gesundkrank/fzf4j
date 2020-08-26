@@ -77,4 +77,16 @@ public class Result {
     public int getItemIndex() {
         return itemIndex;
     }
+
+    @Override
+    public String toString() {
+        return "Result{"
+               + "text='" + text + '\''
+               + ", start=" + start
+               + ", end=" + end
+               + ", score=" + score
+               + ", positions=" + Arrays.toString(positions)
+               + ", itemIndex=" + itemIndex
+               + '}';
+    }
 }
