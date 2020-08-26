@@ -149,7 +149,7 @@ public class View implements AutoCloseable {
                 if (state.getSelectedItems().contains(item.getItemIndex())) {
                     screen.setCharacter(
                             1, row,
-                            new TextCharacter('>', SELECTED_ITEM_COLOR, HIGHLIGHT_BG_COLOR)
+                            new TextCharacter('>', SELECTED_ITEM_COLOR, TextColor.ANSI.DEFAULT)
                     );
                 }
 
