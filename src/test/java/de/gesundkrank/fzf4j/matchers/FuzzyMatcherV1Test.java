@@ -176,4 +176,9 @@ class FuzzyMatcherV1Test {
         checkNoMatch("Foo Bar Baz", "fbb");
         checkNoMatch("fooBarbaz", "fooBarbazz");
     }
+
+    @Test
+    void emptyPattern() {
+        checkMatch("foobar", "", false, false, 0, 0, 0);
+    }
 }

@@ -22,7 +22,17 @@
 
 package de.gesundkrank.fzf4j.models;
 
+import java.util.Arrays;
+
 public class Result {
+
+    public static Result empty(final String text, int itemIndex) {
+        return new Result(text, 0, 0, 0, null, itemIndex);
+    }
+
+    public static Result noMatch(final String text, int itemIndex) {
+        return new Result(text, -1, -1, 0, null, itemIndex);
+    }
 
     private final String text;
     private final int start;
@@ -30,10 +40,6 @@ public class Result {
     private final int score;
     private final int[] positions;
     private final int itemIndex;
-
-    public Result(final String text, int itemIndex) {
-        this(text, -1, -1, 0, null, itemIndex);
-    }
 
     public Result(String text, int start, int end, int score, int[] positions, int itemIndex) {
         this.text = text;

@@ -70,7 +70,7 @@ public class FuzzyMatcherV1 {
     public List<Result> match(final String pattern) {
         if (pattern.isEmpty()) {
             return IntStream.range(0, items.size()).parallel()
-                    .mapToObj(i -> new Result(items.get(i), i))
+                    .mapToObj(i -> Result.empty(items.get(i), i))
                     .collect(Collectors.toList());
         }
 
@@ -138,7 +138,7 @@ public class FuzzyMatcherV1 {
             return calculateScore(text, normalizedText, pattern, startIndex, endIndex, itemIndex);
         }
 
-        return new Result(text, itemIndex);
+        return Result.noMatch(text, itemIndex);
     }
 
     private Result calculateScore(
