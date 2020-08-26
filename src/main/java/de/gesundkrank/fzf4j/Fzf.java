@@ -38,17 +38,24 @@ public class Fzf {
     private final OrderBy orderBy;
     private final boolean reverse;
     private final boolean normalize;
+    private final boolean caseSensitive;
 
     private FuzzyMatcherV1 fuzzyMatcherV1;
 
     public Fzf() {
-        this(OrderBy.SCORE, false, false);
+        this(OrderBy.SCORE, false, false, false);
     }
 
-    public Fzf(final OrderBy orderBy, final boolean reverse, final boolean normalize) {
+    public Fzf(
+            final OrderBy orderBy,
+            final boolean reverse,
+            final boolean normalize,
+            final boolean caseSensitive
+    ) {
         this.orderBy = orderBy;
         this.reverse = reverse;
         this.normalize = normalize;
+        this.caseSensitive = caseSensitive;
     }
 
     /**
@@ -121,7 +128,7 @@ public class Fzf {
             throw new EmptyResultException();
         }
 
-        this.fuzzyMatcherV1 = new FuzzyMatcherV1(items, orderBy, normalize);
+        this.fuzzyMatcherV1 = new FuzzyMatcherV1(items, orderBy, normalize, caseSensitive);
 
         try (final var view = new View(items, reverse)) {
             final var state = new TerminalState(fuzzyMatcherV1.match(""));
@@ -263,9 +270,10 @@ public class Fzf {
         private boolean reverse = false;
         private OrderBy orderBy = OrderBy.SCORE;
         private boolean normalize = false;
+        private boolean caseSensitive = false;
 
         public Fzf build() {
-            return new Fzf(orderBy, reverse, normalize);
+            return new Fzf(orderBy, reverse, normalize, caseSensitive);
         }
 
         /**
@@ -296,6 +304,16 @@ public class Fzf {
          */
         public Builder normalize() {
             this.normalize = true;
+            return this;
+        }
+
+        /**
+         * Be case sensitive when matching strings
+         *
+         * @return Updated {@link Builder}
+         */
+        public Builder caseSensitive() {
+            this.caseSensitive = true;
             return this;
         }
     }

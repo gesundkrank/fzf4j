@@ -24,7 +24,9 @@ package de.gesundkrank.fzf4j.matchers;
 
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_BOUNDARY;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_CAMEL_123;
+import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_CONSECUTIVE;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_FIRST_CHAR_MULTIPLIER;
+import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.BONUS_NON_WORD;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.SCORE_GAP_EXTENSION;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.SCORE_GAP_START;
 import static de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1.SCORE_MATCH;
@@ -44,23 +46,28 @@ class FuzzyMatcherV1Test {
     private void checkMatch(
             final String input,
             final String pattern,
+            final boolean caseSensitive,
             final int expectedStartIndex,
             final int expectedEndIndex,
             final int expectedScore
     ) {
-        checkMatch(input, pattern, false, expectedStartIndex, expectedEndIndex, expectedScore);
+        checkMatch(
+                input, pattern, false, caseSensitive, expectedStartIndex, expectedEndIndex,
+                expectedScore
+        );
     }
 
     private void checkMatch(
             final String input,
             final String pattern,
             final boolean normalize,
+            final boolean caseSensitive,
             final int expectedStartIndex,
             final int expectedEndIndex,
             final int expectedScore
     ) {
         final var matcher = new FuzzyMatcherV1(
-                Collections.singletonList(input), OrderBy.SCORE, normalize);
+                Collections.singletonList(input), OrderBy.SCORE, normalize, caseSensitive);
         final var results = matcher.match(pattern);
         assertThat(results, is(not(empty())));
 
@@ -72,7 +79,7 @@ class FuzzyMatcherV1Test {
 
     private void checkNoMatch(final String input, final String pattern) {
         final var matcher = new FuzzyMatcherV1(
-                Collections.singletonList(input), OrderBy.SCORE, false);
+                Collections.singletonList(input), OrderBy.SCORE, false, true);
         final var results = matcher.match(pattern);
         assertThat(results, is(empty()));
     }
@@ -82,30 +89,80 @@ class FuzzyMatcherV1Test {
      */
     @Test
     void match() {
-        checkMatch("fooBarbaz", "oBz", 2, 9,
+        checkMatch("fooBarbaz1", "oBZ", false, 2, 9,
                    SCORE_MATCH * 3 + BONUS_CAMEL_123 + SCORE_GAP_START + SCORE_GAP_EXTENSION * 3
         );
-        checkMatch("Foo/Bar/Baz", "FBB", 0, 9,
+        checkMatch("foo bar baz", "fbb", false, 0, 9,
+                   SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_BOUNDARY * 2 + 2 * SCORE_GAP_START + 4 * SCORE_GAP_EXTENSION
+        );
+        checkMatch("/AutomatorDocument.icns", "rdoc", false, 9, 13,
+                   SCORE_MATCH * 4 + BONUS_CAMEL_123 + BONUS_CONSECUTIVE * 2
+        );
+        checkMatch("/man1/zshcompctl.1", "zshc", false, 6, 10,
+                   SCORE_MATCH * 4 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_BOUNDARY * 3
+        );
+        checkMatch("/.oh-my-zsh/cache", "zshc", false, 8, 13,
+                   SCORE_MATCH * 4 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_BOUNDARY * 3 + SCORE_GAP_START
+        );
+        checkMatch("ab0123 456", "12356", false, 3, 10,
+                   SCORE_MATCH * 5 + BONUS_CONSECUTIVE * 3 + SCORE_GAP_START + SCORE_GAP_EXTENSION
+        );
+        checkMatch("abc123 456", "12356", false, 3, 10,
+                   SCORE_MATCH * 5 + BONUS_CAMEL_123 * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_CAMEL_123 * 2 + BONUS_CONSECUTIVE + SCORE_GAP_START + SCORE_GAP_EXTENSION
+        );
+        checkMatch("foo/bar/baz", "fbb", false, 0, 9,
+                   SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_BOUNDARY * 2 + 2 * SCORE_GAP_START + 4 * SCORE_GAP_EXTENSION
+        );
+        checkMatch("fooBarBaz", "fbb", false, 0, 7,
+                   SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_CAMEL_123 * 2 + 2 * SCORE_GAP_START + 2 * SCORE_GAP_EXTENSION
+        );
+        checkMatch("foo barbaz", "fbb", false, 0, 8,
+                   SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER + BONUS_BOUNDARY
+                   + SCORE_GAP_START * 2 + SCORE_GAP_EXTENSION * 3
+        );
+        checkMatch("fooBar Baz", "foob", false, 0, 4,
+                   SCORE_MATCH * 4 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_BOUNDARY * 3
+        );
+        checkMatch("xFoo-Bar Baz", "foo-b", false, 1, 6,
+                   SCORE_MATCH * 5 + BONUS_CAMEL_123 * BONUS_FIRST_CHAR_MULTIPLIER
+                   + BONUS_CAMEL_123 * 2 + BONUS_NON_WORD + BONUS_BOUNDARY
+        );
+
+        checkMatch("fooBarbaz", "oBz", true, 2, 9,
+                   SCORE_MATCH * 3 + BONUS_CAMEL_123 + SCORE_GAP_START + SCORE_GAP_EXTENSION * 3
+        );
+
+        checkMatch("Foo/Bar/Baz", "FBB", true, 0, 9,
                    SCORE_MATCH * 3 + BONUS_BOUNDARY * (BONUS_FIRST_CHAR_MULTIPLIER + 2)
                    + SCORE_GAP_START * 2 + SCORE_GAP_EXTENSION * 4
         );
-        checkMatch("FooBarBaz", "FBB", 0, 7,
+
+        checkMatch("FooBarBaz", "FBB", true, 0, 7,
                    SCORE_MATCH * 3 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
                    + BONUS_CAMEL_123 * 2 + SCORE_GAP_START * 2 + SCORE_GAP_EXTENSION * 2
         );
-        checkMatch("FooBar Baz", "FooB", 0, 4,
+
+        checkMatch("FooBar Baz", "FooB", true, 0, 4,
                    SCORE_MATCH * 4 + BONUS_BOUNDARY * BONUS_FIRST_CHAR_MULTIPLIER
                    + BONUS_BOUNDARY * 2 + Math.max(BONUS_CAMEL_123, BONUS_BOUNDARY)
         );
 
         // Consecutive bonus updated
-        checkMatch("foo-bar", "o-ba", 2, 6,
+        checkMatch("foo-bar", "o-ba", false, 2, 6,
                    SCORE_MATCH * 4 + BONUS_BOUNDARY * 3
         );
 
         // Normalize
-        checkMatch("Só Danço Samba", "So", true, 0, 2, 56);
-        checkMatch("Danço", "Danco", true,0, 5, 128);
+        checkMatch("Só Danço Samba", "So", true, false, 0, 2, 56);
+        checkMatch("Só Danço Samba", "sodc", true, false, 0, 7, 89);
+        checkMatch("Danço", "danco", true, false, 0, 5, 128);
 
         // Non-match
         checkNoMatch("fooBarbaz", "oBZ");

@@ -52,23 +52,30 @@ public class FuzzyMatcherV1 {
     private final OrderBy orderBy;
     private final boolean normalize;
     private final List<String> normalizedItems;
+    private final boolean caseSensitive;
 
     public FuzzyMatcherV1(
             final List<String> items,
             final OrderBy orderBy,
-            final boolean normalize
+            final boolean normalize,
+            final boolean caseSensitive
     ) {
         this.items = items;
         this.orderBy = orderBy;
         this.normalize = normalize;
         this.normalizedItems = normalize ? Normalizer.normalize(items) : items;
+        this.caseSensitive = caseSensitive;
     }
 
-    public List<Result> match(final String pattern) {
+    public List<Result> match(String pattern) {
         if (pattern.isEmpty()) {
             return IntStream.range(0, items.size()).parallel()
                     .mapToObj(i -> new Result(items.get(i), i))
                     .collect(Collectors.toList());
+        }
+
+        if (!caseSensitive) {
+            pattern = pattern.toLowerCase();
         }
 
         final String normalizedPattern = normalize ? Normalizer.normalize(pattern) : pattern;
@@ -91,8 +98,14 @@ public class FuzzyMatcherV1 {
         var endIndex = -1;
 
         for (int textIndex = 0; textIndex < normalizedText.length(); textIndex++) {
-            final char textChar = normalizedText.charAt(textIndex);
+            var textChar = normalizedText.charAt(textIndex);
             final char queryChar = pattern.charAt(queryIndex);
+
+            final var charClass = CharClass.forChar(textChar);
+
+            if (!caseSensitive && charClass == CharClass.UPPER) {
+                textChar = Character.toLowerCase(textChar);
+            }
 
             if (textChar == queryChar) {
 
@@ -149,8 +162,12 @@ public class FuzzyMatcherV1 {
                                        : CharClass.NON_WORD;
 
         for (var i = startIndex; i < endIndex; i++) {
-            final var c = normalizedText.charAt(i);
+            var c = normalizedText.charAt(i);
             final var charClass = CharClass.forChar(c);
+
+            if (!caseSensitive && charClass == CharClass.UPPER) {
+                c = Character.toLowerCase(c);
+            }
 
             if (c == pattern.charAt(patternIndex)) {
                 pos[patternIndex] = i;
