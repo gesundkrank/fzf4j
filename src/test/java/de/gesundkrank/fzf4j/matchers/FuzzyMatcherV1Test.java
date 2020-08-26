@@ -41,6 +41,9 @@ import org.junit.jupiter.api.Test;
 
 import de.gesundkrank.fzf4j.models.OrderBy;
 
+/**
+ * Tests copied from https://github.com/junegunn/fzf/blob/master/src/algo/algo_test.go
+ */
 class FuzzyMatcherV1Test {
 
     private void checkMatch(
@@ -84,9 +87,6 @@ class FuzzyMatcherV1Test {
         assertThat(results, is(empty()));
     }
 
-    /**
-     * Tests copied from https://github.com/junegunn/fzf/blob/master/src/algo/algo_test.go
-     */
     @Test
     void match() {
         checkMatch("fooBarbaz1", "oBZ", false, 2, 9,
@@ -134,7 +134,10 @@ class FuzzyMatcherV1Test {
                    SCORE_MATCH * 5 + BONUS_CAMEL_123 * BONUS_FIRST_CHAR_MULTIPLIER
                    + BONUS_CAMEL_123 * 2 + BONUS_NON_WORD + BONUS_BOUNDARY
         );
+    }
 
+    @Test
+    void matchCaseSensitive() {
         checkMatch("fooBarbaz", "oBz", true, 2, 9,
                    SCORE_MATCH * 3 + BONUS_CAMEL_123 + SCORE_GAP_START + SCORE_GAP_EXTENSION * 3
         );
@@ -158,13 +161,17 @@ class FuzzyMatcherV1Test {
         checkMatch("foo-bar", "o-ba", false, 2, 6,
                    SCORE_MATCH * 4 + BONUS_BOUNDARY * 3
         );
+    }
 
-        // Normalize
+    @Test
+    void matchNormalized() {
         checkMatch("Só Danço Samba", "So", true, false, 0, 2, 56);
         checkMatch("Só Danço Samba", "sodc", true, false, 0, 7, 89);
         checkMatch("Danço", "danco", true, false, 0, 5, 128);
+    }
 
-        // Non-match
+    @Test
+    void noMatch() {
         checkNoMatch("fooBarbaz", "oBZ");
         checkNoMatch("Foo Bar Baz", "fbb");
         checkNoMatch("fooBarbaz", "fooBarbazz");
