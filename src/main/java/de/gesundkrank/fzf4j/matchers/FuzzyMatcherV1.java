@@ -67,18 +67,16 @@ public class FuzzyMatcherV1 {
         this.caseSensitive = caseSensitive;
     }
 
-    public List<Result> match(String pattern) {
+    public List<Result> match(final String pattern) {
         if (pattern.isEmpty()) {
             return IntStream.range(0, items.size()).parallel()
                     .mapToObj(i -> Result.empty(items.get(i), i))
                     .collect(Collectors.toList());
         }
 
-        if (!caseSensitive) {
-            pattern = pattern.toLowerCase();
-        }
-
-        final String normalizedPattern = normalize ? Normalizer.normalize(pattern) : pattern;
+        final var lowercasePattern = caseSensitive ? pattern : pattern.toLowerCase();
+        final var normalizedPattern = normalize ? Normalizer.normalize(lowercasePattern)
+                                                : lowercasePattern;
 
         return IntStream.range(0, items.size()).parallel()
                 .mapToObj(i -> match(items.get(i), normalizedItems.get(i), normalizedPattern, i))
