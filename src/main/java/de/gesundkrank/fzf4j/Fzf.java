@@ -31,6 +31,7 @@ import com.googlecode.lanterna.input.KeyType;
 
 import de.gesundkrank.fzf4j.matchers.FuzzyMatcherV1;
 import de.gesundkrank.fzf4j.models.OrderBy;
+import de.gesundkrank.fzf4j.models.TerminalColors;
 import de.gesundkrank.fzf4j.models.TerminalState;
 
 public class Fzf {
@@ -39,23 +40,33 @@ public class Fzf {
     private final boolean reverse;
     private final boolean normalize;
     private final boolean caseSensitive;
+    private final TerminalColors terminalColors;
 
     private FuzzyMatcherV1 fuzzyMatcherV1;
 
     public Fzf() {
-        this(OrderBy.SCORE, false, false, false);
+        this(
+                OrderBy.SCORE,
+                false,
+                false,
+                false,
+                TerminalColors.DEFAULT_COLORS
+        );
     }
 
     public Fzf(
             final OrderBy orderBy,
             final boolean reverse,
             final boolean normalize,
-            final boolean caseSensitive
+            final boolean caseSensitive,
+            final TerminalColors terminalColors
     ) {
+
         this.orderBy = orderBy;
         this.reverse = reverse;
         this.normalize = normalize;
         this.caseSensitive = caseSensitive;
+        this.terminalColors = terminalColors;
     }
 
     /**
@@ -130,7 +141,7 @@ public class Fzf {
 
         this.fuzzyMatcherV1 = new FuzzyMatcherV1(items, orderBy, normalize, caseSensitive);
 
-        try (final var view = new View(items, reverse)) {
+        try (final var view = new View(items, reverse, terminalColors)) {
             final var state = new TerminalState(fuzzyMatcherV1.match(""));
             view.render(state);
             return readInputs(view, state, multiSelect, maxItems);
@@ -271,9 +282,10 @@ public class Fzf {
         private OrderBy orderBy = OrderBy.SCORE;
         private boolean normalize = false;
         private boolean caseSensitive = false;
+        private TerminalColors terminalColors = TerminalColors.DEFAULT_COLORS;
 
         public Fzf build() {
-            return new Fzf(orderBy, reverse, normalize, caseSensitive);
+            return new Fzf(orderBy, reverse, normalize, caseSensitive, terminalColors);
         }
 
         /**
@@ -314,6 +326,17 @@ public class Fzf {
          */
         public Builder caseSensitive() {
             this.caseSensitive = true;
+            return this;
+        }
+
+        /**
+         * Set terminal colors (default = {@link TerminalColors#DEFAULT_COLORS}).
+         *
+         * @param terminalColors New colors
+         * @return Updated {@link Builder}
+         */
+        public Builder terminalColors(final TerminalColors terminalColors) {
+            this.terminalColors = terminalColors;
             return this;
         }
     }
