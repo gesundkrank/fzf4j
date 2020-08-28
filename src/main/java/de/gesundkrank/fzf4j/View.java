@@ -37,6 +37,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
+import de.gesundkrank.fzf4j.models.TerminalColors;
 import de.gesundkrank.fzf4j.models.TerminalState;
 
 /**
@@ -44,15 +45,13 @@ import de.gesundkrank.fzf4j.models.TerminalState;
  */
 public class View implements AutoCloseable {
 
-    public static final TextColor.Indexed HIGHLIGHT_BG_COLOR = new TextColor.Indexed(237);
-    public static final TextColor.Indexed HIGHLIGHT_MATCHED_POS = new TextColor.Indexed(70);
-    public static final TextColor.Indexed SELECTED_ITEM_COLOR = new TextColor.Indexed(1);
     public static final int CHECK_RESIZE_INTERVAL_MS = 100;
 
     private final Screen screen;
     private final int totalItems;
     private final boolean reverse;
     private final ScheduledExecutorService executor;
+    private final TerminalColors terminalColors;
 
     /**
      * Marks the beginning of the drawing window if more items exist than can be shown
@@ -61,7 +60,12 @@ public class View implements AutoCloseable {
 
     private volatile TerminalState state;
 
-    public View(final List<String> items, boolean reverse) throws IOException {
+    public View(
+            final List<String> items,
+            final boolean reverse,
+            final TerminalColors terminalColors
+    ) throws IOException {
+        this.terminalColors = terminalColors;
         var defaultTerminalFactory = new DefaultTerminalFactory();
         this.screen = defaultTerminalFactory.createScreen();
 
@@ -135,29 +139,42 @@ public class View implements AutoCloseable {
                 final var item = visibleItems.get(itemIndex);
                 final var text = item.getText();
                 final var positions = item.getPositions();
+                final var backgroundColor = itemIndex == localSelectedItem
+                                            ? terminalColors.getMarkerBackgroundColor()
+                                            : TextColor.ANSI.DEFAULT;
                 var posIndex = 0;
 
                 if (itemIndex == localSelectedItem) {
                     screen.setCharacter(
-                            0, row, new TextCharacter('>', TextColor.ANSI.RED, HIGHLIGHT_BG_COLOR));
+                            0, row, new TextCharacter(
+                                    '>',
+                                    terminalColors.getMarkerItemColor(),
+                                    backgroundColor
+                            ));
                     screen.setCharacter(
-                            1, row, new TextCharacter(' ', TextColor.ANSI.RED, HIGHLIGHT_BG_COLOR));
+                            1, row, new TextCharacter(
+                                    ' ',
+                                    terminalColors.getMarkerItemColor(),
+                                    backgroundColor
+                            ));
                 } else {
                     screen.setCharacter(0, row, new TextCharacter(' '));
                 }
 
                 if (state.getSelectedItems().contains(item.getItemIndex())) {
                     screen.setCharacter(
-                            1, row,
-                            new TextCharacter('>', SELECTED_ITEM_COLOR, TextColor.ANSI.DEFAULT)
-                    );
+                            1, row, new TextCharacter(
+                                    '>',
+                                    terminalColors.getSelectedItemColor(),
+                                    backgroundColor
+                            ));
                 }
 
                 for (var i = 0; i < item.getText().length(); i++) {
                     final TextColor textColor;
                     if (positions != null && posIndex < positions.length
                         && i == positions[posIndex]) {
-                        textColor = HIGHLIGHT_MATCHED_POS;
+                        textColor = terminalColors.getMatchedCharsColor();
                         posIndex++;
                     } else {
                         textColor = TextColor.ANSI.DEFAULT;
@@ -166,12 +183,11 @@ public class View implements AutoCloseable {
                     final TextCharacter character;
 
                     if (itemIndex == localSelectedItem) {
-                        character = new TextCharacter(text.charAt(i), textColor,
-                                                      HIGHLIGHT_BG_COLOR, SGR.BOLD
+                        character = new TextCharacter(
+                                text.charAt(i), textColor, backgroundColor, SGR.BOLD
                         );
                     } else {
-                        character = new TextCharacter(
-                                text.charAt(i), textColor, TextColor.ANSI.DEFAULT);
+                        character = new TextCharacter(text.charAt(i), textColor, backgroundColor);
                     }
 
                     textGraphics.setCharacter(2 + i, row, character);
