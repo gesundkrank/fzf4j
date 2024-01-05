@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
 
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalTextUtils;
 import com.googlecode.lanterna.TextCharacter;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -170,6 +171,9 @@ public class View implements AutoCloseable {
                             ));
                 }
 
+                // Offset formed by double-width CJK chars
+                var offset = 0;
+
                 for (var i = 0; i < item.getText().length(); i++) {
                     final TextColor textColor;
                     if (positions != null && posIndex < positions.length
@@ -190,8 +194,11 @@ public class View implements AutoCloseable {
                         character = new TextCharacter(text.charAt(i), textColor, backgroundColor);
                     }
 
-                    textGraphics.setCharacter(2 + i, row, character);
+                    textGraphics.setCharacter(2 + i + offset, row, character);
 
+                    if (TerminalTextUtils.isCharCJK(text.charAt(i))) {
+                        offset += 1;
+                    }
                 }
             }
         });
