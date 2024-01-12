@@ -146,28 +146,28 @@ public class View implements AutoCloseable {
 
                 if (itemIndex == localSelectedItem) {
                     screen.setCharacter(
-                            0, row, new TextCharacter(
+                            0, row, TextCharacter.fromCharacter(
                                     '>',
                                     terminalColors.getMarkerItemColor(),
                                     backgroundColor
-                            ));
+                            )[0]);
                     screen.setCharacter(
-                            1, row, new TextCharacter(
+                            1, row, TextCharacter.fromCharacter(
                                     ' ',
                                     terminalColors.getMarkerItemColor(),
                                     backgroundColor
-                            ));
+                            )[0]);
                 } else {
-                    screen.setCharacter(0, row, new TextCharacter(' '));
+                    screen.setCharacter(0, row, TextCharacter.fromCharacter(' ')[0]);
                 }
 
                 if (state.getSelectedItems().contains(item.getItemIndex())) {
                     screen.setCharacter(
-                            1, row, new TextCharacter(
+                            1, row, TextCharacter.fromCharacter(
                                     '>',
                                     terminalColors.getSelectedItemColor(),
                                     backgroundColor
-                            ));
+                            )[0]);
                 }
 
                 for (var i = 0; i < item.getText().length(); i++) {
@@ -183,11 +183,11 @@ public class View implements AutoCloseable {
                     final TextCharacter character;
 
                     if (itemIndex == localSelectedItem) {
-                        character = new TextCharacter(
+                        character = TextCharacter.fromCharacter(
                                 text.charAt(i), textColor, backgroundColor, SGR.BOLD
-                        );
+                        )[0];
                     } else {
-                        character = new TextCharacter(text.charAt(i), textColor, backgroundColor);
+                        character = TextCharacter.fromCharacter(text.charAt(i), textColor, backgroundColor)[0];
                     }
 
                     textGraphics.setCharacter(2 + i, row, character);
